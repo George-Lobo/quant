@@ -190,5 +190,5 @@ class Strategy:
 
 if __name__ == '__main__':
 
-    t1 = create_paper('option', 'aaa', 'bbbbbbbAAAAA')
+    t1 = create_paper('option', 'aaa', 'bbbbbbbAAAAACCCCCC')
     print(type(t1))
