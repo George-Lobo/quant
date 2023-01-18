@@ -29,6 +29,7 @@ class Commodity(Asset):
 
 # parent class of all derivatives
 # TO DOs: get last prices for every derivative; needs to take into consideration the underlying asset
+
 class Derivative(Asset):
 
     def __init__(self, name, asset_name):
@@ -189,5 +190,5 @@ class Strategy:
 
 if __name__ == '__main__':
 
-    t1 = create_paper('option', 'aaa', 'bbbbbbb')
+    t1 = create_paper('option', 'aaa', 'bbbbbbbAAAAA')
     print(type(t1))
