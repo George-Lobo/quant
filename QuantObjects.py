@@ -1,9 +1,8 @@
-# parent class of all assets
 # TO DOs: get last prices for every asset (need to wait until I get the data); find a way to consider current date as to
 # avoid lookahead bias and also control which day the portfolio is in
 import pandas as pd
 
-
+# parent class of all assets
 class Asset:
 
     def __init__(self, name):
