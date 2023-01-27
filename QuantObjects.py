@@ -1,27 +1,29 @@
 # TO DOs: get last prices for every asset (need to wait until I get the data); find a way to consider current date as to
 # avoid lookahead bias and also control which day the portfolio is in
 import os
+import numpy as np
 import pandas as pd
-from GetMarketData import download_stocks_data
+import datetime as dt
+from GetStockData import download_stocks_data
 
 
 # parent class of all assets
 class Asset:
 
-    def __init__(self, name):
+    def __init__(self, name, current_date=dt.datetime.now()):
         self.name = name
-        # self.current_price =
-
-    def volatility(self):
-        pass
+        self.current_date = current_date
 
 
 class Stock(Asset):
-    def __init__(self, name):
-        super().__init__(name)
+
+    def __init__(self, name, current_date=dt.datetime.now()):
+        super().__init__(name, current_date)
         self.paper_type = 'stock'
         self.path = 'tickers_data'
         self.data = self.load_data()
+        self.stddev = self.get_stddev()
+        self.mean = self.get_mean()
 
     def load_data(self):
 
@@ -29,52 +31,71 @@ class Stock(Asset):
 
         # checks if it is necessary to update all data
         if not path_exists:
-            download_stocks_data()
+            download_stocks_data(update_all=True)
 
-        return pd.read_csv(f'{self.path}/{self.name}_data.csv').sort_values('Date', ascending=False)
+        return pd.read_csv(f'{self.path}/{self.name}_data.csv', parse_dates=['Date']).sort_values('Date', ascending=False)
+
+    def get_stddev(self, period_considered=90):
+
+        temp_df = self.data[(self.data['Date'] < self.current_date) &
+                            (self.data['Date'] >= self.current_date - dt.timedelta(days=period_considered))]
+        return np.std(temp_df[f'Close_{self.name}'])
+
+    def get_mean(self, period_considered=90):
+
+        temp_df = self.data[(self.data['Date'] < self.current_date) &
+                            (self.data['Date'] >= self.current_date - dt.timedelta(days=period_considered))]
+        return temp_df[f'Close_{self.name}'].mean()
+
+    def update_date(self, new_date):
+
+        self.current_date = new_date
+        print(f'Date updated to {self.current_date}')
 
 
 class Commodity(Asset):
-    def __init__(self, name):
-        super().__init__(name)
+
+    def __init__(self, name, current_date=dt.datetime.now()):
+        super().__init__(name, current_date)
         self.paper_type = 'commodity'
 
 
 # parent class of all derivatives
 # TO DOs: get last prices for every derivative; needs to take into consideration the underlying asset
 
-class Derivative(Asset):
+class Derivative():
 
-    def __init__(self, name, asset_name):
-        super().__init__(asset_name)
+    def __init__(self, name, asset_name, current_date=dt.datetime.now()):
+        # super().__init__(asset_name, current_date)
         self.name = name
         self.asset_name = asset_name
+        self.current_date = current_date
         # self.current_asset_price = self.current_price
         # self.current_price =
 
 
 class Option(Derivative):
-    def __init__(self, name, asset_name):
-        super().__init__(name, asset_name)
+    def __init__(self, name, asset_name, current_date=dt.datetime.now()):
+        super().__init__(name, asset_name, current_date)
         self.paper_type = 'option'
 
 
 class Future(Derivative):
-    def __init__(self, name, asset_name):
-        super().__init__(name, asset_name)
+    def __init__(self, name, asset_name, current_date=dt.datetime.now()):
+        super().__init__(name, asset_name, current_date)
         self.paper_type = 'future'
 
 
-def create_paper(paper_type, name, asset_name=None):
+def create_paper(paper_type, name, current_date=dt.datetime.now(), asset_name=None):
 
     if paper_type == 'stock':
-        return Stock(name)
+        return Stock(name, current_date)
     elif paper_type == 'commodity':
-        return Commodity(name)
+        return Commodity(name, current_date)
     elif paper_type == 'option':
-        return Option(name, asset_name)
+        return Option(name, asset_name, current_date)
     elif paper_type == 'future':
-        return Future(name, asset_name)
+        return Future(name, asset_name, current_date)
     else:
         print('Paper type not supported')
 
@@ -89,7 +110,6 @@ class Portfolio:
         if initial_history is not None:
             self.history = initial_history
             self.initial_history = self.history
-
 
         else:
             self.history = pd.DataFrame(data=['cash', 'cash', initial_cash, 1, initial_cash, initial_date, 'starting_portfolio'],
@@ -173,7 +193,7 @@ class Portfolio:
 
     # returns the current value of all assets under management (sum of the column from history)
     def current_aum(self):
-        return get_exposure['current_amount'].sum()
+        return self.get_exposure['current_amount'].sum()
 
     # returns the performance of the portfolio
     def return_to_date(self):
@@ -203,5 +223,5 @@ class Strategy:
 
 if __name__ == '__main__':
 
-    t1 = create_paper('stock', 'AAPL')
-    print(t1.data.head())
+    t1 = create_paper('stock', 'AAPL', dt.datetime(year=2023, month=1, day=20))
+    print(t1.mean)
