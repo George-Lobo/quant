@@ -26,6 +26,7 @@ def download_stocks_data(tickers=None, start_time=None, end_time=None, update_al
     # flattening the MultiIndex and replacing whitespaces with underscores
     columns1 = [' '.join(col).strip() for col in df.columns.values]
     df.columns = [i.replace(' ', '_') for i in columns1]
+    df.index = pd.to_datetime(df.index).tz_localize(None)
 
     # saving all data into a single file
     if update_all:
@@ -61,4 +62,4 @@ def download_stocks_data(tickers=None, start_time=None, end_time=None, update_al
 
 
 if __name__ == '__main__':
-    download_stocks_data()
+    download_stocks_data(update_all=True)
