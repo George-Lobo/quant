@@ -5,42 +5,60 @@ import datetime as dt
 import yfinance as yfin
 from pandas_datareader import data as pdr
 
-# need this because apparently pandas_datareader changed a bit
-yfin.pdr_override()
 
-current_date = dt.datetime.now() + dt.timedelta(days=1)
+def download_stocks_data(tickers=None, start_time=None, end_time=None, update_all=False):
 
-end_time = current_date
-start_time = dt.datetime(year=2015, month=1, day=1)
+    if not tickers:
+        tickers = list(pd.read_csv('high_volume_tickers.csv')['Symbol'])
 
-tickers = list(pd.read_csv('high_volume_tickers.csv')['Symbol'])
+    if not end_time:
+        current_date = dt.datetime.now() + dt.timedelta(days=1)
+        end_time = current_date
 
-df = pdr.get_data_yahoo(tickers, start_time, end_time)
+    if not start_time:
+        start_time = dt.datetime(year=2015, month=1, day=1)
 
-# flattening the MultiIndex and replacing whitespaces with underscores
-columns1 = [' '.join(col).strip() for col in df.columns.values]
-df.columns = [i.replace(' ', '_') for i in columns1]
+    # need this because apparently pandas_datareader changed a bit
+    yfin.pdr_override()
 
-# saving all data into a single file
-df.to_csv('500_stocks_data.csv')
+    df = pdr.get_data_yahoo(tickers, start_time, end_time)
 
-# saving each stock separately to a new directory
-path = 'tickers_data'
+    # flattening the MultiIndex and replacing whitespaces with underscores
+    columns1 = [' '.join(col).strip() for col in df.columns.values]
+    df.columns = [i.replace(' ', '_') for i in columns1]
 
-path_exists = os.path.exists('tickers_data')
+    # saving all data into a single file
+    if update_all:
+        df.to_csv('500_stocks_data.csv')
 
-column_titles = ['Open_', 'High_', 'Low_', 'Close_', 'Adj_Close_', 'Volume_']
+    # saving each stock separately to a new directory
+    path = 'tickers_data'
 
-if not path_exists:
+    path_exists = os.path.exists('tickers_data')
 
-    os.makedirs(path)
+    column_titles = ['Open_', 'High_', 'Low_', 'Close_', 'Adj_Close_', 'Volume_']
 
-for each_ticker in tqdm(tickers):
+    if not path_exists:
 
-    column_names = [i + each_ticker for i in column_titles]
+        os.makedirs(path)
 
-    temp_df = df[column_names]
+    for each_ticker in tqdm(tickers):
 
-    current_ticker = each_ticker.replace('/', '-')
+        column_names = [i + each_ticker for i in column_titles]
 
-    temp_df.to_csv(f'{path}/{current_ticker}_data.csv')
+        temp_df = df[column_names]
+
+        current_ticker = each_ticker.replace('/', '-')
+
+        temp_df.to_csv(f'{path}/{current_ticker}_data.csv')
+
+    print(f'Added data from {start_time} to {end_time}.')
+
+    # build thi in the future if not possible anymore to retrieve all data in a single request
+    def update_stocks_data():
+
+       pass
+
+
+if __name__ == '__main__':
+    download_stocks_data()

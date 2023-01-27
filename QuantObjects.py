@@ -1,6 +1,9 @@
 # TO DOs: get last prices for every asset (need to wait until I get the data); find a way to consider current date as to
 # avoid lookahead bias and also control which day the portfolio is in
+import os
 import pandas as pd
+from GetMarketData import download_stocks_data
+
 
 # parent class of all assets
 class Asset:
@@ -17,7 +20,18 @@ class Stock(Asset):
     def __init__(self, name):
         super().__init__(name)
         self.paper_type = 'stock'
+        self.path = 'tickers_data'
+        self.data = self.load_data()
 
+    def load_data(self):
+
+        path_exists = os.path.exists(f'{self.path}/{self.name}_data.csv')
+
+        # checks if it is necessary to update all data
+        if not path_exists:
+            download_stocks_data()
+
+        return pd.read_csv(f'{self.path}/{self.name}_data.csv').sort_values('Date', ascending=False)
 
 
 class Commodity(Asset):
@@ -189,5 +203,5 @@ class Strategy:
 
 if __name__ == '__main__':
 
-    t1 = create_paper('option', 'aaa', 'bbbbbbbAAAAACCCCCC')
-    print(type(t1))
+    t1 = create_paper('stock', 'AAPL')
+    print(t1.data.head())
