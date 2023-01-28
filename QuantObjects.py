@@ -4,26 +4,30 @@ import os
 import numpy as np
 import pandas as pd
 import datetime as dt
-from GetStockData import download_stocks_data
+from GetStockData import download_stocks_data, get_correlation_list
 
+
+def get_todays_datetime():
+    return dt.datetime(year=dt.datetime.now().year, month=dt.datetime.now().month, day=dt.datetime.now().day)
 
 # parent class of all assets
 class Asset:
 
-    def __init__(self, name, current_date=dt.datetime.now()):
+    def __init__(self, name, current_date=get_todays_datetime()):
         self.name = name
         self.current_date = current_date
 
 
 class Stock(Asset):
 
-    def __init__(self, name, current_date=dt.datetime.now()):
+    def __init__(self, name, current_date=get_todays_datetime()):
         super().__init__(name, current_date)
         self.paper_type = 'stock'
         self.path = 'tickers_data'
         self.data = self.load_data()
         self.stddev = self.get_stddev()
         self.mean = self.get_mean()
+        self.current_price = self.get_price()
 
     def load_data(self):
 
@@ -52,10 +56,14 @@ class Stock(Asset):
         self.current_date = new_date
         print(f'Date updated to {self.current_date}')
 
+    def get_price(self):
+
+        return self.data.loc[self.data['Date'] == self.current_date, f'Close_{self.name}']
+
 
 class Commodity(Asset):
 
-    def __init__(self, name, current_date=dt.datetime.now()):
+    def __init__(self, name, current_date=get_todays_datetime()):
         super().__init__(name, current_date)
         self.paper_type = 'commodity'
 
@@ -65,7 +73,7 @@ class Commodity(Asset):
 
 class Derivative():
 
-    def __init__(self, name, asset_name, current_date=dt.datetime.now()):
+    def __init__(self, name, asset_name, current_date=get_todays_datetime()):
         # super().__init__(asset_name, current_date)
         self.name = name
         self.asset_name = asset_name
@@ -75,18 +83,18 @@ class Derivative():
 
 
 class Option(Derivative):
-    def __init__(self, name, asset_name, current_date=dt.datetime.now()):
+    def __init__(self, name, asset_name, current_date=get_todays_datetime()):
         super().__init__(name, asset_name, current_date)
         self.paper_type = 'option'
 
 
 class Future(Derivative):
-    def __init__(self, name, asset_name, current_date=dt.datetime.now()):
+    def __init__(self, name, asset_name, current_date=get_todays_datetime()):
         super().__init__(name, asset_name, current_date)
         self.paper_type = 'future'
 
 
-def create_paper(paper_type, name, current_date=dt.datetime.now(), asset_name=None):
+def create_paper(paper_type, name, current_date=get_todays_datetime(), asset_name=None):
 
     if paper_type == 'stock':
         return Stock(name, current_date)
@@ -106,6 +114,7 @@ class Portfolio:
 
     def __init__(self, initial_date, initial_history=None, initial_cash=1e7):
         self.initial_date = initial_date
+        self.current_date = self.initial_date
 
         if initial_history is not None:
             self.history = initial_history
@@ -117,7 +126,7 @@ class Portfolio:
             self.initial_history = self.history
 
     # needs to store net exposure somewhere
-    def buy_paper(self, paper_name, paper_type, quantity, date, underlying_asset_name=None):
+    def buy_paper(self, paper_name, paper_type, quantity, date=get_todays_datetime(), underlying_asset_name=None):
 
         paper = create_paper(paper_type, paper_name, underlying_asset_name)
         paper_row = pd.DataFrame(data=[paper_name, paper_type, paper.current_price * quantity, paper.current_price,
@@ -131,7 +140,7 @@ class Portfolio:
         print(f'Bought {quantity} units of {paper_name}')
 
     # needs to consider short-selling (margin call) and store net exposure somewhere
-    def sell_paper(self, paper_name, paper_type, quantity, date, underlying_asset_name=None):
+    def sell_paper(self, paper_name, paper_type, quantity, date=get_todays_datetime(), underlying_asset_name=None):
 
         paper = create_paper(paper_type, paper_name, underlying_asset_name)
         paper_row = pd.DataFrame(data=[paper_name, paper_type, -paper.current_price * quantity, paper.current_price, -quantity,
@@ -150,8 +159,11 @@ class Portfolio:
 
     # need to set current date to be used in the portfolio; must remember to update this everyday in the data; maybe
     # also set a time of the day
-    def set_current_date(self):
-        pass
+    def set_current_date(self, new_date):
+
+        self.current_date = new_date
+        print(f'Portfolio date updated to {new_date}.')
+        return self.current_date
 
     # should close positions, based on if the portfolio is long or short on it
     def liquidate_asset(self, paper_name, paper_type, date=None, underlying_asset_name=None):
@@ -223,5 +235,4 @@ class Strategy:
 
 if __name__ == '__main__':
 
-    t1 = create_paper('stock', 'AAPL', dt.datetime(year=2023, month=1, day=20))
-    print(t1.mean)
+    print(len(get_correlation_list()))

@@ -55,11 +55,36 @@ def download_stocks_data(tickers=None, start_time=None, end_time=None, update_al
 
     print(f'Added data from {start_time} to {end_time}.')
 
-    # build thi in the future if not possible anymore to retrieve all data in a single request
-    def update_stocks_data():
+# build this in the future if not possible anymore to retrieve all data in a single request
+def update_stocks_data():
 
-       pass
+    pass
+
+
+def get_correlation_list(start_date=dt.datetime(year=2015, month=1, day=1), end_date=dt.datetime.now()):
+
+    df1 = pd.read_csv('500_stocks_data.csv', parse_dates=['Date'])
+    df = df1[(df1['Date'] >= start_date) & (df1['Date'] <= end_date)]
+
+    columns_of_interest = [i for i in df.columns if 'Adj_Close' in i]
+    data = df[columns_of_interest]
+    data_corr = data.corr()
+    high_corr_data = data_corr[data_corr.abs() > 0.95].dropna(thresh=2, axis=1)
+
+    pairs_list = []
+    reduced_pairs_list = []
+
+    for each_column in high_corr_data.columns:
+        current_ticker = each_column.replace('Adj_Close_', '')
+        correlated_columns = high_corr_data[each_column][(high_corr_data[each_column].isnull() == False)].index
+        correlated_stocks = correlated_columns.str.replace('Adj_Close_', '').drop(current_ticker)
+
+        pairs_list += [(current_ticker, i) for i in correlated_stocks]
+        reduced_pairs_list += [(current_ticker, i) for i in correlated_stocks
+                               if (i, current_ticker) not in reduced_pairs_list]
+
+    return reduced_pairs_list
 
 
 if __name__ == '__main__':
-    download_stocks_data(update_all=True)
+    print(len(get_correlation_list()))
