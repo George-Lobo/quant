@@ -4,7 +4,9 @@ import os
 import numpy as np
 import pandas as pd
 import datetime as dt
-from GetStockData import download_stocks_data, get_correlation_list
+from GetStockData import download_stocks_data, get_correlation_list, standardize_price, construct_pair_df
+
+pd.options.mode.chained_assignment = None
 
 
 def get_todays_datetime():
@@ -218,7 +220,7 @@ class Portfolio:
 
 # strategies; need to consider the start and end dates
 # TO DOs: needs to manage risk in decisions (can't just buy everything possible); need to think of long bias strategies
-# as we maybe wouldn't need that much cash to run stat arb only; should strategies be functions?
+
 class Strategy:
 
     def __init__(self, start_date, end_date, all_data):
@@ -234,5 +236,7 @@ class Strategy:
 
 
 if __name__ == '__main__':
+    # USE FUNCTIONS TO GET A LIST OF POSITIVELY CORRELATED AND NEGATIVELY CORRELATED STOCKS;
+    # BASED ON EACH LIST LOOK FOR OPPORTUNITIES (IF IT'S THE SUM OR DIFFERENCE OF Z-SCORES)
 
-    print(len(get_correlation_list()))
+    print(len(get_correlation_list(dt.datetime(year=2021, month=1, day=1), abs_corr_coef=0.95, positive_corr=True)))
