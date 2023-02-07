@@ -2,14 +2,17 @@
 
 Building a platform for quant trading from scratch. Initial focus on Statistical Arbitrage using relative returns. Will possibly deal with absolute prices in the future.
 
-NEXT STEPS:
-1) function that tests for stationarity of each column in the dataframe individually (receive a series as argument)
-
 TO DOs:
 
+- Fix (?) negatively correlated stocks in check_arbitrage_opps.
+- Implement a test for opportunities that seem to be maintaining a high z-score for some time.
+
+
+FUTURE:
+
 - construct_pair_df: treat ratios of series to avoid infs and nans; create ratio columns
-- check_stationarity: implement other methods besides ADF
-- Function that receives current_date and analyzes if an investment opportunity arose in this date; must return True or False; only be called inside another function ()
+- check_stationarity: implement other methods besides ADF; only be called inside another function
+- Function that receives current_date and analyzes if an investment opportunity arose in this date; must return True or False;
 - stop_loss(loss)
 
 Useful links:
