@@ -4,13 +4,10 @@ import os
 import numpy as np
 import pandas as pd
 import datetime as dt
-from GetStockData import download_stocks_data, get_correlation_list, standardize_price, construct_pair_df
+from GetStockData import download_stocks_data, get_correlation_list, construct_pair_df, get_todays_datetime
 
 pd.options.mode.chained_assignment = None
 
-
-def get_todays_datetime():
-    return dt.datetime(year=dt.datetime.now().year, month=dt.datetime.now().month, day=dt.datetime.now().day)
 
 # parent class of all assets
 class Asset:
