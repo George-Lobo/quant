@@ -1,6 +1,6 @@
 # quant
 
-Building a platform for quant trading from scratch. Initial focus on Statistical Arbitrage using relative returns. Will possibly deal with absolute prices in the future.
+Building a platform for quant trading from scratch. Initial focus on Statistical Arbitrage using prices and relative returns.
 
 TO DOs:
 
