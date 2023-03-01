@@ -14,6 +14,7 @@ FUTURE:
 - check_stationarity: implement other methods besides ADF; only be called inside another function
 - Function that receives current_date and analyzes if an investment opportunity arose in this date; must return True or False;
 - stop_loss(loss)
+- add Kalman Filter
 
 Useful links:
 
