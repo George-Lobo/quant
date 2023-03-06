@@ -6,6 +6,7 @@ TO DOs:
 
 - Fix (?) negatively correlated stocks in check_arbitrage_opps.
 - Implement a test for opportunities that seem to be maintaining a high z-score for some time.
+- Analyze histograms of returns to try and find hints about distributions.
 
 
 FUTURE:
