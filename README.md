@@ -4,7 +4,7 @@ Building a platform for quant trading from scratch. Initial focus on Statistical
 
 TO DOs:
 
-- Fix (?) negatively correlated stocks in check_arbitrage_opps.
+- Fix (?) negatively correlated stocks in check_arbitrage_opps (already added SPY, now need to count it into the returns)
 - Implement a test for opportunities that seem to be maintaining a high z-score for some time.
 - Analyze histograms of returns to try and find hints about distributions.
 
