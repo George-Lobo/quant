@@ -1,6 +1,6 @@
 # quant
 
-Building a platform for quant trading from scratch. Initial focus on Statistical Arbitrage using prices and relative returns.
+Building a platform for quant trading from scratch. Initial focus on Statistical Arbitrage using prices and relative returns. GetStockData.py should contain the bulk of the work so far.
 
 TO DOs:
 
